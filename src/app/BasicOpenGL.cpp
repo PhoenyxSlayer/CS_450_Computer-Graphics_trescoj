@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
 	bool DEBUG_MODE = true;
 
 	// GLFW setup
+	// Switch to 4.1 if necessary for macOS
 	GLFWwindow* window = setupGLFW(4, 3, 800, 800, DEBUG_MODE);
 
 	// GLEW setup
