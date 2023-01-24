@@ -62,3 +62,9 @@ install(TARGETS VerifyAssimp RUNTIME DESTINATION bin/VerifyAssimp)
 add_executable(VerifyVulkan ${GENERAL_SOURCES} "./src/app/VerifyVulkan.cpp")
 target_link_libraries(VerifyVulkan ${ALL_LIBRARIES})
 install(TARGETS VerifyVulkan RUNTIME DESTINATION bin/VerifyVulkan)
+
+#Assign01
+add_executable(Assign01 ${GENERAL_SOURCES} "./src/app/Assign01.cpp")
+target_link_libraries(Assign01 ${ALL_LIBRARIES})
+install(TARGETS Assign01 RUNTIME DESTINATION bin/Assign01)
+install(DIRECTORY shaders/Assign01 DESTINATION bin/Assign01/shaders)
