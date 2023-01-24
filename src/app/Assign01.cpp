@@ -11,7 +11,7 @@
 #include "GLSetup.hpp"
 #include "Shader.hpp"
 using namespace std;
-// Trivial change
+// Trivial changes
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
 void createSimpleQuad(Mesh &m) {
