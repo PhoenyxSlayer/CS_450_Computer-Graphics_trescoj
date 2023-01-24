@@ -3,7 +3,7 @@ project( BasicVulkan )
 
 set(CMAKE_INSTALL_PREFIX .)
 
-set(MASTER_DEPEND "" CACHE PATH "Set this if necessary to your directory for dependencies.")	
+set(MASTER_DEPEND "E:/Dependencies" CACHE PATH "Set this if necessary to your directory for dependencies.")	
 set(CMAKE_PREFIX_PATH ${MASTER_DEPEND} ${CMAKE_PREFIX_PATH})
 
 #####################################
@@ -62,3 +62,9 @@ install(TARGETS VerifyAssimp RUNTIME DESTINATION bin/VerifyAssimp)
 add_executable(VerifyVulkan ${GENERAL_SOURCES} "./src/app/VerifyVulkan.cpp")
 target_link_libraries(VerifyVulkan ${ALL_LIBRARIES})
 install(TARGETS VerifyVulkan RUNTIME DESTINATION bin/VerifyVulkan)
+
+# Assign01
+add_executable(Assign01 ${GENERAL_SOURCES} "./src/app/Assign01.cpp")
+target_link_libraries(Assign01 ${ALL_LIBRARIES})
+install(TARGETS Assign01 RUNTIME DESTINATION bin/Assign01)
+install(DIRECTORY shaders/Assign01 DESTINATION bin/Assign01/shaders)
