@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 	GLuint programID = 0;
 	try {
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shader/Assign01/Basic.vs");
+		string vertexCode = readFileToString("./shaders/Assign01/Basic.vs");
 		string fragCode = readFileToString("./shaders/Assign01/Basic.fs");
 
 		// Print out shader code, just to check
