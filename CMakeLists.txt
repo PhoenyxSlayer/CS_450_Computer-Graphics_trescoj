@@ -54,6 +54,7 @@ install(TARGETS BasicOpenGL RUNTIME DESTINATION bin/BasicOpenGL)
 install(DIRECTORY shaders/BasicOpenGL DESTINATION bin/BasicOpenGL/shaders)
 
 # VerifyAssimp
+#COMMENT THESE
 add_executable(VerifyAssimp ${GENERAL_SOURCES} "./src/app/VerifyAssimp.cpp")
 target_link_libraries(VerifyAssimp ${ALL_LIBRARIES})
 install(TARGETS VerifyAssimp RUNTIME DESTINATION bin/VerifyAssimp)
@@ -68,3 +69,9 @@ add_executable(Assign01 ${GENERAL_SOURCES} "./src/app/Assign01.cpp")
 target_link_libraries(Assign01 ${ALL_LIBRARIES})
 install(TARGETS Assign01 RUNTIME DESTINATION bin/Assign01)
 install(DIRECTORY shaders/Assign01 DESTINATION bin/Assign01/shaders)
+
+#Exercises03
+add_executable(Exercises03 ${GENERAL_SOURCES} "./src/app/Exercises03.cpp")
+target_link_libraries(Exercises03 ${ALL_LIBRARIES})
+install(TARGETS Assign01 RUNTIME DESTINATION bin/Exercises03)
+install(DIRECTORY shaders/Exercises03 DESTINATION bin/Exercises03/shaders)
