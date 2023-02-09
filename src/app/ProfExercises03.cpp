@@ -39,11 +39,22 @@ int main(int argc, char **argv) {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
+    glewExperimental = true;
+    GLenum err = glewInit();
+    if(err != GLEW_OK) {
+        cout << "GLEW ERROR: ";
+        cout << glewGetErrorString(err) << endl;
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        exit(1);
+    }
+
     int fwidth = 0;
     int fheight = 0;
 
     glClearColor(0.8f, 0.0f, 0.1f, 1.0f);
 
+    // Render loop
     while(!glfwWindowShouldClose(window)) {
         glfwGetFramebufferSize(window, &fwidth, &fheight);
         glViewport(0, 0, fwidth, fheight);
