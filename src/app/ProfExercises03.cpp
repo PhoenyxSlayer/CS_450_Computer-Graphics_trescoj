@@ -17,6 +17,18 @@ vector<GLfloat> vertOnly = {
     +0.3f, +0.3f, 0.0f,
 };
 
+vector<GLfloat> vertList = {
+    -0.3f, +0.3f, 0.0f,
+    +0.3f, +0.3f, 0.0f,
+    -0.3f, -0.3f, 0.0f,
+    +0.3f, -0.3f, 0.0f,
+};
+
+vector<GLuint> indexList = {
+    0, 3, 1,
+    2, 3, 0,
+};
+
 static void error_callback(int error, const char* desc) {
     cout << "ERROR " << error << ": " << desc << endl;
 }
@@ -111,19 +123,35 @@ int main(int argc, char **argv) {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     
-    glBufferData(   GL_ARRAY_BUFFER, vertOnly.size()*sizeof(GLfloat), 
-                    vertOnly.data(), GL_STATIC_DRAW);
+    //glBufferData(   GL_ARRAY_BUFFER, 
+    //                vertOnly.size()*sizeof(GLfloat), 
+    //                vertOnly.data(), GL_STATIC_DRAW);
+
+    glBufferData(   GL_ARRAY_BUFFER, 
+                    vertList.size()*sizeof(GLfloat), 
+                    vertList.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Setup EBO
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(   GL_ELEMENT_ARRAY_BUFFER,
+                    indexList.size()*sizeof(GLuint),
+                    indexList.data(), GL_STATIC_DRAW);
 
     // Setup VAO
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 3*sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 
+                            3*sizeof(float), 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -136,7 +164,7 @@ int main(int argc, char **argv) {
 
 
 
-
+    int vcnt = vertOnly.size()/3;
 
     // Render loop
     while(!glfwWindowShouldClose(window)) {
@@ -147,7 +175,9 @@ int main(int argc, char **argv) {
 
         glUseProgram(progID);
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glDrawArrays(GL_TRIANGLES, 0, vcnt);
+        glDrawElements(GL_TRIANGLES, indexList.size(),
+                        GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
         glUseProgram(0);
 
@@ -158,6 +188,9 @@ int main(int argc, char **argv) {
 
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &vao);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &ebo);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &vbo);
