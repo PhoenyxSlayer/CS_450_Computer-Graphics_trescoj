@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 	// Set the background color to a shade of blue
 	glClearColor(0.0f, 0.0f, 0.7f, 1.0f);	
 
-	// Create and load shader
+	// Create and load shaders
 	GLuint programID = 0;
 	try {		
 		// Load vertex shader code and fragment shader code

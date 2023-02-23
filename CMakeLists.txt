@@ -3,7 +3,7 @@ project( BasicVulkan )
 
 set(CMAKE_INSTALL_PREFIX .)
 
-set(MASTER_DEPEND "" CACHE PATH "Set this if necessary to your directory for dependencies.")	
+set(MASTER_DEPEND "E:/Dependencies" CACHE PATH "Set this if necessary to your directory for dependencies.")	
 set(CMAKE_PREFIX_PATH ${MASTER_DEPEND} ${CMAKE_PREFIX_PATH})
 
 #####################################

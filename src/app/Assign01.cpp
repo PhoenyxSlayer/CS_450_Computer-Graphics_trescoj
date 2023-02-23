@@ -100,7 +100,6 @@ int main(int argc, char** argv) {
 	// Create OpenGL mesh (VAO) from data
 	MeshGL mgl;
 	createMeshGL(m, mgl);
-
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
@@ -116,7 +115,7 @@ int main(int argc, char** argv) {
 		// Use shader program
 		glUseProgram(programID);
 
-		// Draw object
+		// Draw object]
 		drawMesh(mgl);
 
 		// Swap buffers and poll for window events		
@@ -133,7 +132,6 @@ int main(int argc, char** argv) {
 	// Clean up shader programs
 	glUseProgram(0);
 	glDeleteProgram(programID);
-
 	// Destroy window and stop GLFW
 	cleanupGLFW(window);
 
