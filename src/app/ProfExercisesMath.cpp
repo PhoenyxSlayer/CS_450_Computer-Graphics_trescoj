@@ -68,6 +68,14 @@ int main(int argc, char **argv) {
     float dotAB = glm::dot(normA, normB);
     cout << "dotAB: " << dotAB << endl;
 
+    glm::vec3 N = glm::cross(A, B);
+    N = glm::normalize(N);
+    cout << "N: " << glm::to_string(N) << endl;
+
+    glm::vec3 rN = glm::cross(B, A);
+    rN = glm::normalize(rN);
+    cout << "rN: " << glm::to_string(rN) << endl;
+
 
 
 
