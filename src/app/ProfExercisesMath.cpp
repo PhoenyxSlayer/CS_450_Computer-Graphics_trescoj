@@ -64,6 +64,9 @@ int main(int argc, char **argv) {
     glm::vec4 test(1,0,0,1);
     cout << "length(test): " << glm::length(test) << endl;
 
+    glm::vec3 normB = glm::normalize(B);
+    float dotAB = glm::dot(normA, normB);
+    cout << "dotAB: " << dotAB << endl;
 
 
 
