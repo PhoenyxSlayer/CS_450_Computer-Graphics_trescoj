@@ -36,7 +36,7 @@ int main(int argc, char **argv){
     int fwidth = 0;
     int fheight = 0;
 
-    glClearColor(0.8, 0.0, 0.1, 1.0);
+    glClearColor(0.8f, 0.0f, 0.1f, 1.0f);
 
     while(!glfwWindowShouldClose(window)){
         glfwGetFramebufferSize(window, &fwidth, &fheight);
