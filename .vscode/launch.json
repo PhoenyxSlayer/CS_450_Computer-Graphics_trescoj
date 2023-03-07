@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "800", "600"
+                "./sampleModels/teapot.obj"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
