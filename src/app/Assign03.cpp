@@ -216,14 +216,15 @@ int main(int argc, char** argv) {
 void extractMeshData(aiMesh *mesh, Mesh &m){
 	Vertex vert;
 	int i = 0;
-	//float j = 0.0;
 
 	m.indices.clear();
 	m.vertices.clear();
 
 	for(i = 0; (unsigned int)i < mesh->mNumVertices; i++){
+		float t = float(i) / float(mesh->mNumVertices);
+
 		vert.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vert.color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0);
+		vert.color = glm::vec4(std::sin(glm::radians(t * 360.0f)), std::sin(glm::radians(t * 360.0f + 120.0f)), std::sin(glm::radians(t * 360.0f + 240.0f)), 1.0);
 		m.vertices.push_back(vert);
 	}
 
