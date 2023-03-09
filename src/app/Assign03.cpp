@@ -10,6 +10,10 @@
 #include "MeshGLData.hpp"
 #include "GLSetup.hpp"
 #include "Shader.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 using namespace std;
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
@@ -99,9 +103,19 @@ void createSimplePentagon(Mesh& m) {
 	m.indices.push_back(4);
 }
 
+void extractMeshData(aiMesh *mesh, Mesh &m);
+
 // Main 
 int main(int argc, char** argv) {
+	Assimp::Importer importer;
+	string modelPath =  "sampleModels/sphere.obj";
+	vector<MeshGL> objMeshes;
 
+	if(argc >= 2) modelPath = argv[1];
+
+	const aiScene *scene = importer.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
+	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) cerr<<"Error: "<<importer.GetErrorString()<<endl;
+	
 	// Are we in debugging mode?
 	bool DEBUG_MODE = true;
 
@@ -125,8 +139,8 @@ int main(int argc, char** argv) {
 	GLuint programID = 0; 
 	try {
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign02/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign02/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign03/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign03/Basic.fs");
 
 		// Print out shader code, just to check
 		if (DEBUG_MODE) printShaderCode(vertexCode, fragCode);
@@ -141,12 +155,19 @@ int main(int argc, char** argv) {
 	}
 
 	// Create simple quad
-	Mesh m;
+	/*Mesh m;
 	createSimplePentagon(m);
 
 	// Create OpenGL mesh (VAO) from data
 	MeshGL mgl;
-	createMeshGL(m, mgl);
+	createMeshGL(m, mgl);*/
+	for(int i = 0; (unsigned int)i < scene->mNumMeshes; i++){
+		Mesh m;
+		MeshGL mgl;
+		extractMeshData(scene->mMeshes[i], m);
+		createMeshGL(m, mgl);
+		objMeshes.push_back(mgl);
+	}
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
@@ -163,7 +184,10 @@ int main(int argc, char** argv) {
 		glUseProgram(programID);
 
 		// Draw object]
-		drawMesh(mgl);
+		//drawMesh(mgl);
+		for(int i = 0; i < objMeshes.size(); i++){
+			drawMesh(objMeshes[i]);
+		}
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
@@ -174,7 +198,11 @@ int main(int argc, char** argv) {
 	}
 
 	// Clean up mesh
-	cleanupMesh(mgl);
+	//cleanupMesh(mgl);
+	for(int i = 0; i < objMeshes.size(); i++){
+		cleanupMesh(objMeshes[i]);
+	}
+	objMeshes.clear();
 
 	// Clean up shader programs
 	glUseProgram(0);
@@ -183,4 +211,25 @@ int main(int argc, char** argv) {
 	cleanupGLFW(window);
 
 	return 0;
+}
+
+void extractMeshData(aiMesh *mesh, Mesh &m){
+	Vertex vert;
+	int i = 0;
+	//float j = 0.0;
+
+	m.indices.clear();
+	m.vertices.clear();
+
+	for(i = 0; (unsigned int)i < mesh->mNumVertices; i++){
+		vert.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vert.color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0);
+		m.vertices.push_back(vert);
+	}
+
+	for(i = 0; (unsigned int)i < mesh->mNumFaces; i++){
+		for(int j = 0; (unsigned int)j < mesh->mFaces[i].mNumIndices; j++){
+			m.indices.push_back(mesh->mFaces[i].mIndices[j]);
+		}
+	}
 }
