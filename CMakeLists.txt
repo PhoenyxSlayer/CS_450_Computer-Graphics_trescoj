@@ -80,3 +80,9 @@ add_executable(ProfExercisesMath ${GENERAL_SOURCES} "./src/app/ProfExercisesMath
 target_link_libraries(ProfExercisesMath ${ALL_LIBRARIES})
 install(TARGETS ProfExercisesMath RUNTIME DESTINATION bin/ProfExercisesMath)
 install(DIRECTORY shaders/ProfExercisesMath DESTINATION bin/ProfExercisesMath/shaders)
+
+# ProfExercises07
+add_executable(ProfExercises07 ${GENERAL_SOURCES} "./src/app/ProfExercises07.cpp")
+target_link_libraries(ProfExercises07 ${ALL_LIBRARIES})
+install(TARGETS ProfExercises07 RUNTIME DESTINATION bin/ProfExercises07)
+install(DIRECTORY shaders/ProfExercises07 DESTINATION bin/ProfExercises07/shaders)
