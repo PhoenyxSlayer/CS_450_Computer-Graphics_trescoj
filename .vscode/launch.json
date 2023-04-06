@@ -12,12 +12,25 @@
             "console": "externalTerminal"
         },
         {
-            "name": "(Windows) Launch - Teapot",
+            "name": "(Windows) CS 450 Launch",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                 "sampleModels/teapot.obj"
+                "./sampleModels/teapot.obj"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
+            "name": "(Windows) CS 548 Launch - Teapot",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "800", "600", "./sampleModels/teapot.obj"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
