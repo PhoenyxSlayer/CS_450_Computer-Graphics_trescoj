@@ -13,6 +13,8 @@
 #include "glm/gtc/type_ptr.hpp"
 using namespace std;
 
+glm::vec2 lastMousePos;
+
 vector<GLfloat> vertOnly = {
     -0.3f, -0.3f, 0.0f,
     +0.3f, -0.3f, 0.0f,
@@ -68,6 +70,15 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 static void error_callback(int error, const char* desc) {
     cout << "ERROR " << error << ": " << desc << endl;
+}
+
+static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    glm::vec2 curMousePos = glm::vec2(xpos, ypos);
+    cout << "MOUSE: " << glm::to_string(curMousePos) << endl;
+
+    // MOUSE MAGIC
+
+    lastMousePos = curMousePos;
 }
 
 int main(int argc, char **argv) {
@@ -158,6 +169,13 @@ int main(int argc, char **argv) {
         glfwTerminate();
         exit(1);
     }
+
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    lastMousePos = glm::vec2(xpos, ypos);
+
+    glfwSetCursorPosCallback(window, mouse_position_callback);
+
 
     int fwidth = 0;
     int fheight = 0;
