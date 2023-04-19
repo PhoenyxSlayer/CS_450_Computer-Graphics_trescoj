@@ -151,8 +151,8 @@ int main(int argc, char** argv) {
 	GLuint programID = 0; 
 	try {
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign03/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign03/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign04/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign04/Basic.fs");
 
 		// Print out shader code, just to check
 		if (DEBUG_MODE) printShaderCode(vertexCode, fragCode);
@@ -276,7 +276,7 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, G
 	}
 
 	for(int i = 0; i < node->mNumChildren; i++){
-		aiNode* child = node->mChildren[i]
-		parentMat = modelMat;
+		aiNode* child = node->mChildren[i];
+		renderScene(allMeshes, child, modelMat, modelMatLoc, level+1);		
 	}
 }
