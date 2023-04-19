@@ -115,7 +115,9 @@ void extractMeshData(aiMesh *mesh, Mesh &m);
 
 glm::mat4 makeRotateZ(glm::vec3);
 
-void renderScene(vector<MeshGL>, aiNode, glm::mat4, GLint, int);
+void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level);
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 // Main 
 int main(int argc, char** argv) {
@@ -134,6 +136,7 @@ int main(int argc, char** argv) {
 	// GLFW setup
 	// Switch to 4.1 if necessary for macOS
 	GLFWwindow* window = setupGLFW(4, 3, 800, 800, DEBUG_MODE);
+	glfwSetKeyCallback(window, key_callback);
 
 	// GLEW setup
 	setupGLEW(window);
@@ -151,8 +154,8 @@ int main(int argc, char** argv) {
 	GLuint programID = 0; 
 	try {
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign04/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign04/Basic.fs");
+		string vertexCode = readFileToString("shaders/Assign04/Basic.vs");
+		string fragCode = readFileToString("shaders/Assign04/Basic.fs");
 
 		// Print out shader code, just to check
 		if (DEBUG_MODE) printShaderCode(vertexCode, fragCode);
@@ -183,6 +186,8 @@ int main(int argc, char** argv) {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
+	GLint location = glGetUniformLocation(programID, "modelMat");
+
 	while (!glfwWindowShouldClose(window)) {
 		// Set viewport size
 		int fwidth, fheight;
@@ -197,9 +202,11 @@ int main(int argc, char** argv) {
 
 		// Draw object]
 		//drawMesh(mgl);
-		for(int i = 0; i < objMeshes.size(); i++){
+		/*for(int i = 0; i < objMeshes.size(); i++){
 			drawMesh(objMeshes[i]);
-		}
+		}*/
+
+		renderScene(objMeshes, scene->mRootNode, glm::mat4(1.0), location, 0);
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
@@ -247,13 +254,27 @@ void extractMeshData(aiMesh *mesh, Mesh &m){
 	}
 }
 
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods){
+	if(action == GLFW_PRESS || action == GLFW_REPEAT){
+		if(key == GLFW_KEY_ESCAPE){
+			glfwSetWindowShouldClose(window, true);
+		}else if(key == GLFW_KEY_J){
+			rotAngle += 1.0f;
+			cout<<rotAngle<<endl;
+		}else if(key == GLFW_KEY_K){
+			rotAngle -= 1.0f;
+			cout<<rotAngle<<endl;
+		}
+	}
+}
+
 glm::mat4 makeRotateZ(glm::vec3 offset){
-	rotAngle = glm::radians(rotAngle);
+	float angle = glm::radians(rotAngle);
 
 	glm::mat4 negTranslation = glm::translate(glm::mat4(1.0f), -offset);
-	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), rotAngle, glm::vec3(0, 0, 1));
-	glm::mat4 translation = glm::translate(glm::mat4(1.04), offset);
-	glm::mat4 transform = negTranslation * rotation * translation;
+	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
+	glm::mat4 translation = glm::translate(glm::mat4(1.0f), offset);
+	glm::mat4 transform = translation * rotation * negTranslation;
 
 	return transform;
 }
@@ -270,12 +291,12 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, G
 
 	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(tmpModel));
 
-	for(int i = 0; i < node->mNumMeshes; i++){
+	for(int i = 0; (unsigned int)i < node->mNumMeshes; i++){
 		int index = node->mMeshes[i];
 		drawMesh(allMeshes.at(index));
 	}
 
-	for(int i = 0; i < node->mNumChildren; i++){
+	for(int i = 0; (unsigned int)i < node->mNumChildren; i++){
 		aiNode* child = node->mChildren[i];
 		renderScene(allMeshes, child, modelMat, modelMatLoc, level+1);		
 	}

@@ -17,7 +17,7 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./sampleModels/teapot.obj"
+                "./sampleModels/bunnyteatime.glb"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
