@@ -24,6 +24,9 @@ using namespace std;
 
 float rotAngle = 0.0f;
 
+glm::vec3 cameraPos, cameraLook(0.0f, 0.0f, 0.0f);
+glm::vec2 mousePos;
+
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
 void createSimpleQuad(Mesh& m) {
 	// Clear out vertices and elements
@@ -118,6 +121,10 @@ glm::mat4 makeRotateZ(glm::vec3);
 void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level);
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+glm::mat4 makeLocalRotate(glm::vec3, glm::vec3, float);
+
+static void mouse_position_callback(GLFWwindow *window, double, double);
 
 // Main 
 int main(int argc, char** argv) {
@@ -268,6 +275,17 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	}
 }
 
+static void mouse_position_callback(GLFWwindow *window, double xpos, double ypos){
+	glm::vec2 relMouse = glm::vec2(xpos, ypos) - mousePos;
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	if((width && height) > 0){
+		relMouse.x /= (float)width;
+		relMouse.y /= (float)height;
+	}
+}
+
 glm::mat4 makeRotateZ(glm::vec3 offset){
 	float angle = glm::radians(rotAngle);
 
@@ -300,4 +318,15 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, G
 		aiNode* child = node->mChildren[i];
 		renderScene(allMeshes, child, modelMat, modelMatLoc, level+1);		
 	}
+}
+
+glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
+	float radAngle = glm::radians(angle);
+
+	glm::mat4 n = glm::translate(glm::mat4(1.0f), -offset);
+	glm::mat4 r = glm::rotate(glm::mat4(1.0f), radAngle, glm::vec3(0, 0, 1));
+	glm::mat4 t = glm::translate(glm::mat4(1.0f), offset);
+	glm::mat4 transform = t*r*n;
+
+	return transform;
 }
