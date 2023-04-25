@@ -14,7 +14,7 @@ void main()
 	vec4 objPos = vec4(position, 1.0);
 
 	// For now, just pass along vertex position (no transformations)
-	gl_Position = modelMat*viewMat*projMat*objPos;
+	gl_Position = projMat*viewMat*modelMat*objPos;
 
 	// Output per-vertex color
 	vertexColor = color;

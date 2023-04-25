@@ -24,7 +24,7 @@ using namespace std;
 
 float rotAngle = 0.0f;
 
-glm::vec3 cameraPos, cameraLook(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraPos(0.0f, 0.0f, 1.0f), cameraLook(0.0f, 0.0f, 0.0f);
 glm::vec2 mousePos;
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
@@ -131,6 +131,7 @@ int main(int argc, char** argv) {
 	Assimp::Importer importer;
 	string modelPath =  "sampleModels/sphere.obj";
 	vector<MeshGL> objMeshes;
+	double mx, my;
 
 	if(argc >= 2) modelPath = argv[1];
 
@@ -193,7 +194,14 @@ int main(int argc, char** argv) {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
+	glfwGetCursorPos(window, &mx, &my);
+	mousePos = glm::vec2(mx, my);
+	glfwSetCursorPosCallback(window, mouse_position_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	GLint location = glGetUniformLocation(programID, "modelMat");
+	GLint viewLoc = glGetUniformLocation(programID, "viewMat");
+	GLint projLoc = glGetUniformLocation(programID, "projMat");
 
 	while (!glfwWindowShouldClose(window)) {
 		// Set viewport size
@@ -212,6 +220,21 @@ int main(int argc, char** argv) {
 		/*for(int i = 0; i < objMeshes.size(); i++){
 			drawMesh(objMeshes[i]);
 		}*/
+
+		glm::mat4 view = glm::lookAt(cameraPos, cameraLook, glm::vec3(0,1,0));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		float ratio = 0;
+
+		if((width || height) == 0){
+			ratio = 1;
+		}else{
+			ratio = width/height;
+		}
+
+		glm::mat4 projection = glm::perspective(glm::radians(90.0f), ratio, 0.01f, 50.0f);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		renderScene(objMeshes, scene->mRootNode, glm::mat4(1.0), location, 0);
 
@@ -262,6 +285,7 @@ void extractMeshData(aiMesh *mesh, Mesh &m){
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods){
+	glm::vec3 direction;
 	if(action == GLFW_PRESS || action == GLFW_REPEAT){
 		if(key == GLFW_KEY_ESCAPE){
 			glfwSetWindowShouldClose(window, true);
@@ -271,6 +295,26 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		}else if(key == GLFW_KEY_K){
 			rotAngle -= 1.0f;
 			cout<<rotAngle<<endl;
+		}else if(key == GLFW_KEY_W){
+			direction = cameraLook - cameraPos;
+			direction = normalize(direction);
+			cameraPos += direction * 0.1f;
+			cameraLook += direction * 0.1f;			
+		}else if(key == GLFW_KEY_S){			
+			direction = cameraLook - cameraPos;
+			direction = normalize(direction);
+			cameraPos -= direction * 0.1f;
+			cameraLook -= direction * 0.1f;
+		}else if(key == GLFW_KEY_A){
+			direction = cross((cameraLook-cameraPos), glm::vec3(0,1,0));
+			direction = normalize(direction);
+			cameraPos -= direction * 0.1f;
+			cameraLook -= direction * 0.1f;
+		}else if(key == GLFW_KEY_D){
+			direction = cross((cameraLook-cameraPos), glm::vec3(0,1,0));
+			direction = normalize(direction);
+			cameraPos += direction * 0.1f;
+			cameraLook += direction * 0.1f;
 		}
 	}
 }
@@ -281,8 +325,15 @@ static void mouse_position_callback(GLFWwindow *window, double xpos, double ypos
 	glfwGetFramebufferSize(window, &width, &height);
 
 	if((width && height) > 0){
-		relMouse.x /= (float)width;
+		relMouse.x /= -(float)width;
 		relMouse.y /= (float)height;
+
+		glm::mat4 xPosition = makeLocalRotate(cameraPos, glm::vec3(0,1,0), 30.0f*relMouse.x);
+		glm::mat4 yPosition = makeLocalRotate(cameraPos, glm::cross(glm::vec3(0,1,0), (cameraLook-cameraPos)), 30.0f*relMouse.y);
+		glm::vec4 lookAtV = glm::vec4(cameraLook, 1);
+		lookAtV = xPosition*yPosition*lookAtV;
+		cameraLook = glm::vec3(lookAtV);
+		mousePos = glm::vec2(xpos, ypos);
 	}
 }
 
@@ -324,7 +375,7 @@ glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
 	float radAngle = glm::radians(angle);
 
 	glm::mat4 n = glm::translate(glm::mat4(1.0f), -offset);
-	glm::mat4 r = glm::rotate(glm::mat4(1.0f), radAngle, glm::vec3(0, 0, 1));
+	glm::mat4 r = glm::rotate(glm::mat4(1.0f), radAngle, axis);
 	glm::mat4 t = glm::translate(glm::mat4(1.0f), offset);
 	glm::mat4 transform = t*r*n;
 
