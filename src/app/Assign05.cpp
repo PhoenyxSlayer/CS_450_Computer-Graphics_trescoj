@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
 		if((width || height) == 0){
 			ratio = 1;
 		}else{
-			ratio = width/height;
+			ratio = (float)(width/height);
 		}
 
 		glm::mat4 projection = glm::perspective(glm::radians(90.0f), ratio, 0.01f, 50.0f);
@@ -324,7 +324,7 @@ static void mouse_position_callback(GLFWwindow *window, double xpos, double ypos
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 
-	if((width && height) > 0){
+	if(width > 0 && height > 0){
 		relMouse.x /= -(float)width;
 		relMouse.y /= (float)height;
 
