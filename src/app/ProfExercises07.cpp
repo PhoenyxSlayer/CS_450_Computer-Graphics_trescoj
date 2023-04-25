@@ -13,6 +13,13 @@
 #include "glm/gtc/type_ptr.hpp"
 using namespace std;
 
+glm::vec2 lastMousePos;
+
+struct PointLight {
+    glm::vec4 pos = glm::vec4(0,0,0,1);
+    glm::vec4 color = glm::vec4(1,1,1,1);
+};
+
 vector<GLfloat> vertOnly = {
     -0.3f, -0.3f, 0.0f,
     +0.3f, -0.3f, 0.0f,
@@ -23,11 +30,12 @@ vector<GLfloat> vertOnly = {
     +0.3f, +0.3f, 0.0f,
 };
 
+float squareSize = 0.7f;
 vector<GLfloat> vertList = {
-    -0.3f, +0.3f, 0.0f,
-    +0.3f, +0.3f, 0.0f,
-    -0.3f, -0.3f, 0.0f,
-    +0.3f, -0.3f, 0.0f,
+    -squareSize, +squareSize, 0.0f, 0.0f, 0.0f, 1.0f,
+    +squareSize, +squareSize, 0.0f, 0.0f, 0.0f, 1.0f,
+    -squareSize, -squareSize, 0.0f, 0.0f, 0.0f, 1.0f,
+    +squareSize, -squareSize, 0.0f, 0.0f, 0.0f, 1.0f,
 };
 
 vector<GLuint> indexList = {
@@ -68,6 +76,15 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 static void error_callback(int error, const char* desc) {
     cout << "ERROR " << error << ": " << desc << endl;
+}
+
+static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    glm::vec2 curMousePos = glm::vec2(xpos, ypos);
+    cout << "MOUSE: " << glm::to_string(curMousePos) << endl;
+
+    // MOUSE MAGIC
+
+    lastMousePos = curMousePos;
 }
 
 int main(int argc, char **argv) {
@@ -159,6 +176,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    lastMousePos = glm::vec2(xpos, ypos);
+
+    glfwSetCursorPosCallback(window, mouse_position_callback);
+
+
     int fwidth = 0;
     int fheight = 0;
 
@@ -208,6 +232,16 @@ int main(int argc, char **argv) {
                                             "modelMat");
     cout << "modelMatLoc: " << modelMatLoc << endl;
 
+    GLint viewMatLoc = glGetUniformLocation(progID, "viewMat");
+    GLint projMatLoc = glGetUniformLocation(progID, "projMat");
+
+    GLint lightPosLoc = glGetUniformLocation(progID, "light.pos");
+    GLint lightColorLoc = glGetUniformLocation(progID, "light.color");
+
+    PointLight myLight;
+    myLight.pos = glm::vec4(0,0,0.25,1);
+    myLight.color = glm::vec4(1,1,1,1);
+
     // Setup VBO
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -238,10 +272,15 @@ int main(int argc, char **argv) {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(0); // pos
+    glEnableVertexAttribArray(1); // normal
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 
-                            3*sizeof(float), 0);
+                            6*sizeof(float), 0);                        
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 
+                            6*sizeof(float), ((void*)(3*sizeof(float))));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -266,6 +305,20 @@ int main(int argc, char **argv) {
         glUseProgram(progID);
 
         glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(modelMat));
+
+        glm::mat4 viewMat = glm::lookAt(glm::vec3(1,0,1), glm::vec3(0,0,0), glm::vec3(0,1,0));
+        glUniformMatrix4fv(viewMatLoc, 1, false, glm::value_ptr(viewMat));
+
+        float aspect = 1.0f;
+        if(fwidth > 0 && fheight > 0) {
+            aspect = ((float)fwidth)/((float)fheight);
+        }
+        glm::mat4 projMat = glm::perspective(glm::radians(90.0f), aspect, 0.01f, 50.0f);
+        glUniformMatrix4fv(projMatLoc, 1, false, glm::value_ptr(projMat));
+
+        glm::vec4 viewLightPos = viewMat*myLight.pos;
+        glUniform4fv(lightPosLoc, 1, glm::value_ptr(viewLightPos));
+        glUniform4fv(lightColorLoc, 1, glm::value_ptr(myLight.color));
 
         glBindVertexArray(vao);
         //glDrawArrays(GL_TRIANGLES, 0, vcnt);
