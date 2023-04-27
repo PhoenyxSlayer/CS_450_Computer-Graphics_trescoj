@@ -22,7 +22,6 @@ void main()
 	// For now, just pass along vertex position (no transformations)
 	gl_Position = projMat*viewPos;
 
-	normalMat = transpose(inverse(mat3(viewMat*modelMat)));
 	interNormal = normalMat*normal;
 
 	// Output per-vertex color

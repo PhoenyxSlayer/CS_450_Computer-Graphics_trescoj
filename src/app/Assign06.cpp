@@ -25,6 +25,7 @@ using namespace std;
 float rotAngle = 0.0f;
 
 glm::vec3 cameraPos(0.0f, 0.0f, 1.0f), cameraLook(0.0f, 0.0f, 0.0f);
+glm::vec4 light(0.5f, 0.5f, 0.5f, 1.0f);
 glm::vec2 mousePos;
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
@@ -118,7 +119,7 @@ void extractMeshData(aiMesh *mesh, Mesh &m);
 
 glm::mat4 makeRotateZ(glm::vec3);
 
-void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level);
+void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level, GLint normalMatLoc, glm::mat4 viewMat);
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
@@ -202,6 +203,8 @@ int main(int argc, char** argv) {
 	GLint location = glGetUniformLocation(programID, "modelMat");
 	GLint viewLoc = glGetUniformLocation(programID, "viewMat");
 	GLint projLoc = glGetUniformLocation(programID, "projMat");
+	GLint lightPos = glGetUniformLocation(programID, "lightPos");
+	GLint normalMat = glGetUniformLocation(programID, "normalMat");
 
 	while (!glfwWindowShouldClose(window)) {
 		// Set viewport size
@@ -235,8 +238,9 @@ int main(int argc, char** argv) {
 
 		glm::mat4 projection = glm::perspective(glm::radians(90.0f), ratio, 0.01f, 50.0f);
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-		renderScene(objMeshes, scene->mRootNode, glm::mat4(1.0), location, 0);
+		glm::vec4 pos = view*light;
+		glUniform4fv(lightPos, 1, glm::value_ptr(pos));
+		renderScene(objMeshes, scene->mRootNode, glm::mat4(1.0), location, 0, normalMat, view);
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
@@ -270,10 +274,9 @@ void extractMeshData(aiMesh *mesh, Mesh &m){
 	m.vertices.clear();
 
 	for(i = 0; (unsigned int)i < mesh->mNumVertices; i++){
-		float t = float(i) / float(mesh->mNumVertices);
-
 		vert.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vert.color = glm::vec4(std::sin(glm::radians(t * 360.0f)), std::sin(glm::radians(t * 360.0f + 120.0f)), std::sin(glm::radians(t * 360.0f + 240.0f)), 1.0);
+		vert.color = glm::vec4(1.0, 1.0, 0.0, 1.0);
+		vert.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 		m.vertices.push_back(vert);
 	}
 
@@ -348,7 +351,7 @@ glm::mat4 makeRotateZ(glm::vec3 offset){
 	return transform;
 }
 
-void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level){
+void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, GLint modelMatLoc, int level, GLint normalMatLoc, glm::mat4 viewMat){
 	aiMatrix4x4 transformation = node->mTransformation;
 	glm::mat4 nodeT;
 	aiMatToGLM4(transformation, nodeT);
@@ -357,7 +360,9 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, G
 	glm::vec3 nodeLoc = glm::vec3(modelMat[3]);
 	glm::mat4 R = makeRotateZ(nodeLoc);
 	glm::mat4 tmpModel = R*modelMat;
+	glm::mat3 normalMat = transpose(inverse(glm::mat3(viewMat*tmpModel)));
 
+	glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, glm::value_ptr(normalMat));
 	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(tmpModel));
 
 	for(int i = 0; (unsigned int)i < node->mNumMeshes; i++){
@@ -367,7 +372,7 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat, G
 
 	for(int i = 0; (unsigned int)i < node->mNumChildren; i++){
 		aiNode* child = node->mChildren[i];
-		renderScene(allMeshes, child, modelMat, modelMatLoc, level+1);		
+		renderScene(allMeshes, child, modelMat, modelMatLoc, level+1, normalMatLoc, viewMat);		
 	}
 }
 

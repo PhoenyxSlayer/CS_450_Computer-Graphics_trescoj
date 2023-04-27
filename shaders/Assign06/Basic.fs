@@ -11,11 +11,11 @@ uniform vec4 lightPos;
 void main()
 {	
 	vec3 N = normalize(interNormal);
-	vec3 L = vec3(lightPos.pos - interPos);
+	vec3 L = vec3(lightPos - interPos);
 	L = normalize(L);
 
 	float diffFactor = max(0.0, dot(N, L));
-	vec3 diffColor = vertexColor*diffFactor;
+	vec4 diffColor = vertexColor*diffFactor;
 	// Just output interpolated color
 	out_color = diffColor;
 }

@@ -10,6 +10,7 @@ using namespace std;
 struct Vertex {
 	glm::vec3 position;
 	glm::vec4 color;
+	glm::vec3 normal;
 };
 
 // Struct for holding mesh data
